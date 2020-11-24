@@ -42,9 +42,6 @@ if __name__ == "__main__":
         .option("subscribe", KAFKA_OUTPUT_TOPIC_NAME_CONS) \
         .option("startingOffsets", "latest") \
         .load()
-    # mainDf = df.selectExpr("*")
-    # print(mainDf)
-
 
     print("Printing Schema of df: ")
     df.printSchema()
@@ -67,50 +64,11 @@ if __name__ == "__main__":
     df3 = spark.sql("select transaction_detail.*, timestamp from main_table ")
     df3.printSchema()
 
-    # # Simple aggregate - find total_transaction_amount by grouping transaction_card_type
     df4 = df3
        
     # print("Printing Schema of df4: ")
     df4.printSchema()
 
-    # # def cleanTxt(text):
-    # #     text = re.sub('@[A-Za-z0–9]+', '', text) #Removing @mentions
-    # #     text = re.sub('#', '', text) # Removing '#' hash tag
-    # #     text = re.sub('RT[\s]+', '', text) # Removing RT
-    # #     text = re.sub('https?:\/\/\S+', '', text) # Removing hyperlink
-    # #     # return text
-    # #     print('after cleaning text', text)
-
-
-    # # ### Sentiment Analysis ###
-    # # def get_sentiment_analysis_result(text):
-    # #     print('bikame!!! mesa !!!', text)
-    # #     tag = ''
-
-    # #     cleanTxt(text)
-
-    # #     # def getSubjectivity(text):
-    # #     subjectivity = TextBlob(text).sentiment.subjectivity
-    # #     print('subjectivity',subjectivity)
-    # #     # def getPolarity(text):
-    # #     polarity =  TextBlob(text).sentiment.polarity
-    # #     print('polarity',polarity)
-
-    # #     if polarity < 0:
-    # #         tag = 'Negative'
-    # #         return tag
-    # #     elif polarity == 0:
-    # #         tag = 'Neutral'
-    # #         return tag
-    # #     else:
-    # #         tag = 'Positive'
-    # #         return tag
-    # #     print(tag)
-
-
-    # # get_sentiment_analysis_result_udf = udf(get_sentiment_analysis_result, StringType())
-    # # df5 = df4.withColumn("sentiment_analysis_result", get_sentiment_analysis_result_udf(df4["sentence"]))
-    # ### Sentiment Analysis ###
 
     # # Write final result into console for debugging purpose
     # # .trigger(processingTime='15 seconds') \
