@@ -24,5 +24,3 @@ if __name__ == "__main__":
         print(registered_user)
         producer.send("baidentopic", registered_user) 
         time.sleep(1.5)
-        
-

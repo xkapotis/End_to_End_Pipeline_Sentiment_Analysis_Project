@@ -12,7 +12,7 @@ from wordcloud import WordCloud
 import pandas as pd
 import numpy as np
 import re
-
+from pyspark.sql.functions import spark_partition_id, count as _count
 
 
 
@@ -51,8 +51,9 @@ if __name__ == "__main__":
     print("Printing Schema of df: ")
     df.printSchema()
 
-    df1 = df.selectExpr("CAST(value AS STRING)", "timestamp")
+    df1 = df.selectExpr("CAST(value AS STRING)", "topic", "CAST(partition AS STRING)", "timestamp")
     # df1.show()
+    
 
 
     # Define a schema for the transaction_detail data
@@ -62,11 +63,31 @@ if __name__ == "__main__":
      
 
     df2 = df1\
-        .select(from_json(col("value"), schema).alias("transaction_detail"), "timestamp")
+        .select(from_json(col("value"), schema).alias("transaction_detail"), "topic", "partition", "timestamp")
+
 
     df2.createOrReplaceTempView("main_table")
 
-    df3 = spark.sql("select transaction_detail.*, timestamp from main_table ")
+    df3 = spark.sql("select transaction_detail.*, topic, partition, timestamp from main_table ")
+
+            ### Check Partitioning ###
+    ########  Partitioning Restaurants ############
+    df3 = df3.repartitionByRange(2, col("candidate"))
+    # print(restaurants_partitioned.show())
+    # print(restaurants_partitioned.rdd.getNumPartitions())
+    # restaurants_partitioned.write.mode("overwrite").csv("apotelesmata/results.txt")
+
+    print("-------- print the length of each partition  -------------------")
+    df3_partitioning_details = df3.withColumn("partition_id", spark_partition_id()).groupBy("partition_id").agg(_count("candidate"))
+    
+
+    print_partitioning_details = df3_partitioning_details \
+    .writeStream \
+        .trigger(processingTime='15 seconds') \
+    .outputMode("update") \
+    .option("truncate", "false")\
+    .format("console") \
+    .start()
 
     # Simple aggregate - find total_transaction_amount by grouping transaction_card_type
     df4 = df3
@@ -136,7 +157,7 @@ if __name__ == "__main__":
         .option("topic", KAFKA_OUTPUT_TOPIC_NAME_CONS) \
         .trigger(processingTime='1 seconds') \
         .outputMode("update") \
-        .option("checkpointLocation", "file:///home//xkapotis//development//spark_scripts//read_from_kafka//checkpoint_new") \
+        .option("checkpointLocation", "file:///home//xkapotis//development//spark_scripts//read_from_kafka//checkpoint") \
         .start()
         # /home/xkapotis/development/spark_scripts/read_from_kafka/pysparkScript.py
 
