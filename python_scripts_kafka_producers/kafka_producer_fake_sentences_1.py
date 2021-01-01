@@ -23,4 +23,4 @@ if __name__ == "__main__":
         registered_user = get_registered_user()
         print(registered_user)
         producer.send("baidentopic", registered_user) 
-        time.sleep(1.5)
+        time.sleep(1)

@@ -157,7 +157,7 @@ if __name__ == "__main__":
         .option("topic", KAFKA_OUTPUT_TOPIC_NAME_CONS) \
         .trigger(processingTime='1 seconds') \
         .outputMode("update") \
-        .option("checkpointLocation", "file:///home//xkapotis//development//spark_scripts//read_from_kafka//checkpoint") \
+        .option("checkpointLocation", "file:///home//xkapotis//development//spark_scripts//read_from_kafka//checkpoint_new") \
         .start()
         # /home/xkapotis/development/spark_scripts/read_from_kafka/pysparkScript.py
 
