@@ -1,6 +1,6 @@
-# spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.1 newTry.py 
+# spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.1 main.py ### for run the script
 
-#### if stop writestream in kafka may have change checkpoint location and after if i want i can to reuse the previous one my main checkpoint location
+### if stop writestream in kafka may have change checkpoint location and after if i want i can to reuse the previous one my main checkpoint location
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
@@ -54,8 +54,6 @@ if __name__ == "__main__":
     df1 = df.selectExpr("CAST(value AS STRING)", "topic", "CAST(partition AS STRING)", "timestamp")
     # df1.show()
     
-
-
     # Define a schema for the transaction_detail data
     schema = StructType() \
         .add("sentence", StringType()) \
@@ -65,17 +63,11 @@ if __name__ == "__main__":
     df2 = df1\
         .select(from_json(col("value"), schema).alias("transaction_detail"), "topic", "partition", "timestamp")
 
-
     df2.createOrReplaceTempView("main_table")
 
     df3 = spark.sql("select transaction_detail.*, topic, partition, timestamp from main_table ")
 
-            ### Check Partitioning ###
-    ########  Partitioning Restaurants ############
     df3 = df3.repartitionByRange(2, col("candidate"))
-    # print(restaurants_partitioned.show())
-    # print(restaurants_partitioned.rdd.getNumPartitions())
-    # restaurants_partitioned.write.mode("overwrite").csv("apotelesmata/results.txt")
 
     print("-------- print the length of each partition  -------------------")
     df3_partitioning_details = df3.withColumn("partition_id", spark_partition_id()).groupBy("partition_id").agg(_count("candidate"))
@@ -89,9 +81,7 @@ if __name__ == "__main__":
     .format("console") \
     .start()
 
-    # Simple aggregate - find total_transaction_amount by grouping transaction_card_type
-    df4 = df3
-       
+    df4 = df3     
     print("Printing Schema of df4: ")
     df4.printSchema()
 
@@ -157,7 +147,7 @@ if __name__ == "__main__":
         .option("topic", KAFKA_OUTPUT_TOPIC_NAME_CONS) \
         .trigger(processingTime='1 seconds') \
         .outputMode("update") \
-        .option("checkpointLocation", "file:///home//xkapotis//development//spark_scripts//read_from_kafka//checkpoint_new") \
+        .option("checkpointLocation", "file:///home//xkapotis//development//spark_scripts//read_from_kafka//checkpoint") \
         .start()
         # /home/xkapotis/development/spark_scripts/read_from_kafka/pysparkScript.py
 
